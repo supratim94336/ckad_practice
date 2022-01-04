@@ -1,0 +1,11 @@
+# Mac Files
+.DS_Store
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# VSCODE
+.vscode
+
+# PyCharm
+.idea
