@@ -77,7 +77,7 @@ kubectl describe svc kubernetes
 kubectl get deployment.apps
 
 # expose a deployment to a file
-kubectl expose deployment <<deployment_name>> --name=<<deployment_short_name>> --target-port=<<post_number>> --type=NodePort --port=<<port_number>> --dry-run=client -o yaml > <<deployment_file>>
+kubectl expose deployment <<deployment_name>> --name=<<deployment_short_name>> --target-port=<<port_number>> --type=NodePort --port=<<port_number>> --dry-run=client -o yaml > <<deployment_file>>
 
 # change and apply a service <-- declarative
 kubectl apply -f <<deployment_file>>
@@ -145,8 +145,11 @@ ssh <<node_name>>
 # to get the image used by a scheduler
 kubectl -n kube-system describe pod kube-sceduler-master | grep -i image
 
-# check logs of a container in an app
+# check logs of a container in an app/pod
 kubectl logs webapp-2 -c simple-webapp
+
+# check logs of a pod at a particular namespace
+kubectl -n elastic-stack exec -it app cat /log/app.log
 
 # create a configmap
 kubectl create configmap webapp-color --from-literal=APP_COLOR=darkblue --dry-run=client -o yaml > webapp-color-configmap.yaml
@@ -158,7 +161,7 @@ kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-lite
 kubectl -n elastic-stack exec -it app cat /log/app.log
 
 # get existing pod config as yaml/file
-kubectl get pod app -n elastic-stack -o yaml
+kubectl get pod app -n elastic-stack -o yaml > app.yaml
 
 # drain node for maintenance
 kubectl drain <node_name> --ignore-daemonsets
