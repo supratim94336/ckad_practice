@@ -185,5 +185,8 @@ service etcd restart
 # get etcd version from namespace kube-system <-- always in the namespace kube-system and master/controlplane node
 kubectl describe pod etcd-controlplane -n kube-system
 
+# who is running the pod
+kubectl exec ubuntu-sleeper -- whoami
+
 # address to reach etcd cluster
 kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-urls
