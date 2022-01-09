@@ -182,11 +182,26 @@ etcdctl restore snapshot.db --data-dir /var/lib/etcd-from-backup
 systemctl daemon-reload
 service etcd restart
 
+# create a service based on deployment
+kubectl expose deployment ingress-controller --type=NodePort --port=80 --name=ingress --dry-run=client -o yaml > ingress.yaml
+
 # get etcd version from namespace kube-system <-- always in the namespace kube-system and master/controlplane node
 kubectl describe pod etcd-controlplane -n kube-system
 
 # who is running the pod
 kubectl exec ubuntu-sleeper -- whoami
+
+# find pods by label
+kubectl get pods -l name=payroll
+
+# show labels
+kubectl get pods --show-labels
+
+# create ingress
+kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
+
+# get all ingresses
+kubectl get ingress --all-namespaces
 
 # address to reach etcd cluster
 kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-urls
