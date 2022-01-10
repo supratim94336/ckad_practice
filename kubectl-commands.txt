@@ -1,3 +1,4 @@
+--- Pods ----------------------------------------------------
 # create a pod/replcationcontroller/replicaset
 kubectl create -f pod-definition.yml
 
@@ -13,6 +14,34 @@ kubectl describe pod <<pod_name>>
 # edit pod config
 kubectl edit pod <<pod_name>>
 
+# check pods in detail
+kubectl get pods --all-namespaces -o wide
+
+# check logs of a container in an app/pod
+kubectl logs webapp-2 -c simple-webapp
+
+# check logs of a pod at a particular namespace
+kubectl -n elastic-stack exec -it app cat /log/app.log
+
+# get inside an app 
+kubectl -n elastic-stack exec -it app cat /log/app.log
+
+# get existing pod config as yaml/file
+kubectl get pod app -n elastic-stack -o yaml > app.yaml
+
+# who is running the pod
+kubectl exec ubuntu-sleeper -- whoami
+
+# find pods by label
+kubectl get pods -l name=payroll
+
+# show labels
+kubectl get pods --show-labels
+
+# to get the image used by a scheduler pod
+kubectl -n kube-system describe pod kube-sceduler-master | grep -i image
+
+--- Replicaset ----------------------------------------------------
 # scale the replicaset with more replica
 kubectl replace -f replicaset-definition.yml
 
@@ -22,6 +51,7 @@ kubectl scale --replicas=6 -f replicaset-definition.yml
 # get all replicasets
 kubectl get replicasets.apps
 
+--- Deployments ----------------------------------------------------
 # get all deployments
 kubectl get deployments.apps
 
@@ -39,13 +69,19 @@ kubectl expose deployment nginx --port 80
 # change image for a deployment
 kubectl set image deployment nginx nginx=nginx:1.18
 
-# expose a running pod
-kubectl expose pod nginx --port 80 --name=nginx-service
-
-
 # get status
 kubectl get deployments.apps httpd-frontend
 
+# dry run deployment to create a file
+kubectl create deployment <<deployment_name>> --image=nginx --dry-run -o yaml > red.yaml
+
+# rollout - status/history
+kubectl rollout status deployment nginx
+kubectl rollout history deployment nginx
+kubectl rollout history deployment nginx --revision=1
+kubectl set image deployment nginx nginx=nginx:1.17 --record
+
+--- Namespaces ----------------------------------------------------
 # create namespace
 kubectl create namespace <<namespace_name>>
 
@@ -53,7 +89,7 @@ kubectl create namespace <<namespace_name>>
 kubectl get pods --namespace=prod
 
 # get pods on a specific node 
-    kubectl get pods --all-namespaces -o wide --field-selector spec.nodeName=node01
+kubectl get pods --all-namespaces -o wide --field-selector spec.nodeName=node01
 
 # set context for a namespace
 kubectl config set-context $(kubectl config current-context) --namespace=dev
@@ -64,6 +100,16 @@ kubectl run redis --image=redis --namespace=finance
 # find a pod
 kubectl get pods --all-namespaces | grep blue
 
+# expose a running pod
+kubectl expose pod nginx --port 80 --name=nginx-service
+
+# get namespaces (wc -l count number of lines and --no-headers avoid header)
+kubectl get namespace --no-headers | wc -l
+
+# get pods in a namespace
+kubectl get pods --namespace=<<namespace_name>>
+
+--- Services ----------------------------------------------------
 # create a service
 kubectl create -f service-definition.yml
 
@@ -73,20 +119,11 @@ kubectl get services/svc
 # describe services (describe <<type>> <<name>>)
 kubectl describe svc kubernetes
 
-# get deployments
-kubectl get deployment.apps
-
 # expose a deployment to a file
 kubectl expose deployment <<deployment_name>> --name=<<deployment_short_name>> --target-port=<<port_number>> --type=NodePort --port=<<port_number>> --dry-run=client -o yaml > <<deployment_file>>
 
 # change and apply a service <-- declarative
 kubectl apply -f <<deployment_file>>
-
-# get namespaces (wc -l count number of lines and --no-headers avoid header)
-kubectl get namespace --no-headers | wc -l
-
-# get pods in a namespace
-kubectl get pods --namespace=<<namespace_name>>
 
 # create a file on the fly
 kubectl run redis --image=redis:alpine --dry-run=client -o yaml > redis-pod.yaml
@@ -94,13 +131,14 @@ kubectl run redis --image=redis:alpine --dry-run=client -o yaml > redis-pod.yaml
 # create a file on the fly 2: check file creation first look (whenever you're creating a pod and exposing it, it automatically creates a service, cause you can expose a service not a pod)
 kubectl run httpd --image=httpd:alpine --port 80 --expose --dry-run=client -o yaml
 
-# get pods by environment and selector
+# get pods by by selector
 kubectl get pods --selector env=dev
 kubectl get pods --selector bu=finance
 
 # get all info including replicas
 kubectl get all --selector env=prod
 
+--- Taints ----------------------------------------------------
 # taint a node
 kubectl taint node node01 spray=mortein:NoSchedule
 
@@ -116,15 +154,7 @@ kubectl create deployment blue --image=nginx --replicas=3
 # get taints associated with a node
 kubectl describe node node01 | grep -iF taints
 
-# edit deployment
-kubectl edit deployment <<deployment_name>>
-
-# more info about pods
-kubectl get pods -o wide
-
-# dry run deployment to create a file
-kubectl create deployment <<deployment_name>> --image=nginx --dry-run -o yaml > red.yaml
-
+--- Daemonsets ----------------------------------------------------
 # get all DaemonSets in all namespaces
 kubectl get DaemonSets --all-namespaces
 
@@ -132,36 +162,13 @@ kubectl get DaemonSets --all-namespaces
 # by create a deployment, remove strategy, replicas, timeouts, change kind -> deployment to daemonset
 kubectl create deployment elasticsearch --image=k8s.gcr.io/fluentd-elasticsearch:1.20 -n kube-system --dry-run=client -o yaml
 
-# controlplane appended in the name is static pod
-kubectl get pods --all-namespaces -o wide
-
+--- Special -------------------------------------------------------
 # /etc/kubernetes/manifests (if not then check the kubelet config) <-- path where static pods are located <-- create a file there with image, pod name and command
 kubectl run static-busybox --restart=Never --image=busybox --dry-run=client -o yaml --command sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
 ps -ef | grep /usr/bin/kubelet
 
 # ssh to another node
 ssh <<node_name>>
-
-# to get the image used by a scheduler
-kubectl -n kube-system describe pod kube-sceduler-master | grep -i image
-
-# check logs of a container in an app/pod
-kubectl logs webapp-2 -c simple-webapp
-
-# check logs of a pod at a particular namespace
-kubectl -n elastic-stack exec -it app cat /log/app.log
-
-# create a configmap
-kubectl create configmap webapp-color --from-literal=APP_COLOR=darkblue --dry-run=client -o yaml > webapp-color-configmap.yaml
-
-# create a secret
-kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123 --dry-run=client -o yaml > db-secret.yaml
-
-# get inside an app 
-kubectl -n elastic-stack exec -it app cat /log/app.log
-
-# get existing pod config as yaml/file
-kubectl get pod app -n elastic-stack -o yaml > app.yaml
 
 # drain node for maintenance
 kubectl drain <node_name> --ignore-daemonsets
@@ -173,7 +180,7 @@ kubectl drain <node_name> --ignore-daemonsets --force
 kubectl uncordon node01
 
 # get all configs used to create all the pods
-kubectl get all  --all-namespaces -o -yaml > all-config.yaml
+kubectl get all --all-namespaces -o -yaml > all-config.yaml
 
 # backup etcd
 etcdctl snapshot save snapshot.db
@@ -182,26 +189,23 @@ etcdctl restore snapshot.db --data-dir /var/lib/etcd-from-backup
 systemctl daemon-reload
 service etcd restart
 
-# create a service based on deployment
-kubectl expose deployment ingress-controller --type=NodePort --port=80 --name=ingress --dry-run=client -o yaml > ingress.yaml
-
 # get etcd version from namespace kube-system <-- always in the namespace kube-system and master/controlplane node
 kubectl describe pod etcd-controlplane -n kube-system
 
-# who is running the pod
-kubectl exec ubuntu-sleeper -- whoami
+# address to reach etcd cluster
+kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-urls
 
-# find pods by label
-kubectl get pods -l name=payroll
-
-# show labels
-kubectl get pods --show-labels
-
+--- Ingress --------------------------------------------------------
 # create ingress
 kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
 
 # get all ingresses
 kubectl get ingress --all-namespaces
 
-# address to reach etcd cluster
-kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-urls
+--- Configs and secrets --------------------------------------------
+# create a configmap
+kubectl create configmap webapp-color --from-literal=APP_COLOR=darkblue --dry-run=client -o yaml > webapp-color-configmap.yaml
+
+# create a secret
+kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123 --dry-run=client -o yaml > db-secret.yaml
+

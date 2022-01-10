@@ -76,11 +76,11 @@ kubectl apply -f https://k8s.io/examples/controllers/daemonset.yaml
 - Services and Deployments are different, but they work together nicely.
 
 ## Pod restart options
-### `Always` - means that the container will be restarted even if it exited with a zero exit code (i.e. successfully). This is useful when you don't care why the container exited, you just want to make sure that it is always running (e.g. a web server). This is the default.
+`Always` - means that the container will be restarted even if it exited with a zero exit code (i.e. successfully). This is useful when you don't care why the container exited, you just want to make sure that it is always running (e.g. a web server). This is the default.
 
-### `OnFailure` -  means that the container will only be restarted if it exited with a non-zero exit code (i.e. something went wrong). This is useful when you want accomplish a certain task with the pod, and ensure that it completes successfully - if it doesn't it will be restarted until it does.
+`OnFailure` -  means that the container will only be restarted if it exited with a non-zero exit code (i.e. something went wrong). This is useful when you want accomplish a certain task with the pod, and ensure that it completes successfully - if it doesn't it will be restarted until it does.
 
-### `Never` - means that the container will not be restarted regardless of why it exited.
+`Never` - means that the container will not be restarted regardless of why it exited.
 
 
 ## Find processes
@@ -350,9 +350,9 @@ kubectl uncordon node01
 - In all our Kubernetes Hands-on labs, the `ETCD` key-value database is deployed as a static pod on the master. The version used is v3.
 - To make use of `etcdctl` for tasks such as back up and restore, make sure that you set the `ETCDCTL_API` to `3`.
 - You can do this by exporting the variable `ETCDCTL_API` prior to using the etcdctl client. This can be done as follows:
-    ```
-    export ETCDCTL_API=3
-    ```
+  ```
+  export ETCDCTL_API=3
+  ```
 ### Save a snapshot
 ```
 etcdctl snapshot save snapshot.db \
@@ -399,12 +399,12 @@ service etcd restart
 service kube-apiserver start
 ```
 
-### Get ETCD address to reach from namespace kube-system and node master/controlplane
+### Get etcd address to reach from namespace kube-system and node master/controlplane
 ```
 kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-urls
 ```
 
-### ETCD, Controller Manager, Kube API Server, Kube Scheduler config file location
+### etcd, Controller Manager, Kube API Server, Kube Scheduler config file location
 ```
 /etc/kubernetes/manifests/
 ```
@@ -531,14 +531,10 @@ master $ kubectl rollout status deployment nginx
 Waiting for deployment "nginx" rollout to finish: 0 of 1 updated replicas are available...
 deployment "nginx" successfully rolled out
 
-master $
-
 master $ kubectl rollout history deployment nginx
 deployment.extensions/nginx
 REVISION CHANGE-CAUSE
 1     <none>
-
-master $
 ```
 
 Using the `–revision` flag:
@@ -566,7 +562,6 @@ You would have noticed that the `change-cause` field is empty in the rollout his
 ```
 master $ kubectl set image deployment nginx nginx=nginx:1.17 --record
 deployment.extensions/nginx image updated
-master $master $
 
 master $ kubectl rollout history deployment nginx
 deployment.extensions/nginx
@@ -574,7 +569,6 @@ deployment.extensions/nginx
 REVISION CHANGE-CAUSE
 1     <none>
 2     kubectl set image deployment nginx nginx=nginx:1.17 --record=true
-master $
 ```
 
 You can now see that the `change-cause` is recorded for the revision 2 of this deployment.
