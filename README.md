@@ -717,6 +717,26 @@ alias kgs='kubectl delete service'
 $ source ~/.bashrc
 ```
 
+### debug connectivity within service
+kubectl exec -ti <<pod-name-1>> -- sh
+
+  - now from within the pod
+    ```
+    nc -z -v <<pod-name-2>> <<port-number>>
+    ```
+    or
+    ```
+     nc -z -v -w 1 <<pod-name-2>> <<port-number>>
+    ```
+
+  - check network policies to check if it's only the default
+    ```
+    kubectl get netpol
+    ```
+  - if no create one and edit one
+    ```
+    kubectl get netpol default -o yaml > netpol-defn.yaml
+    ```
 Useful resources:
 1. https://blog.atomist.com/kubernetes-apply-replace-patch/
 2. https://medium.com/payscale-tech/imperative-vs-declarative-a-kubernetes-tutorial-4be66c5d8914

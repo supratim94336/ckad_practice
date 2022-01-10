@@ -1,13 +1,25 @@
 apiVersion: v1
 kind: Pod
 metadata:
+  creationTimestamp: null
   labels:
-    run: webapp-color
-  name: webapp-color
+    run: time-check
+  name: time-check
+  namespace: dvl1987
 spec:
   containers:
-  - envFrom:
+  - image: busybox
+    name: time-check
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello; sleep 10;done"]
+    envFrom:
     - configMapRef:
-      name: webapp-config-map
-    image: kodekloud/webapp-color
-    name: webapp-color
+        name: time-config
+    volumeMounts:
+    - mountPath: /opt/time
+      name: a-volume
+  volumes:
+  - name: a-volume
+    emptyDir: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
