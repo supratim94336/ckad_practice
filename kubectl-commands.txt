@@ -20,6 +20,9 @@ kubectl get pods --all-namespaces -o wide
 # check logs of a container in an app/pod
 kubectl logs webapp-2 -c simple-webapp
 
+# streamline logs
+kubectl logs webapp-2 -f
+
 # check logs of a pod at a particular namespace
 kubectl -n elastic-stack exec -it app cat /log/app.log
 
@@ -40,6 +43,15 @@ kubectl get pods --show-labels
 
 # to get the image used by a scheduler pod
 kubectl -n kube-system describe pod kube-sceduler-master | grep -i image
+
+# delete a pod once created (and exited immidiately)
+kubectl run --rm -it --image=<image> <podname> -- sh
+
+# check env vars in a pod
+kubectl exec <pod> -- env
+
+# pod consuming max resouces
+kubectl top pod --sort-by='cpu'
 
 --- Replicaset ----------------------------------------------------
 # scale the replicaset with more replica
@@ -162,6 +174,81 @@ kubectl get DaemonSets --all-namespaces
 # by create a deployment, remove strategy, replicas, timeouts, change kind -> deployment to daemonset
 kubectl create deployment elasticsearch --image=k8s.gcr.io/fluentd-elasticsearch:1.20 -n kube-system --dry-run=client -o yaml
 
+--- Ingress --------------------------------------------------------
+# create ingress
+kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
+
+# get all ingresses
+kubectl get ingress --all-namespaces
+
+--- Configs and secrets --------------------------------------------
+# create a configmap
+kubectl create configmap webapp-color --from-literal=APP_COLOR=darkblue --dry-run=client -o yaml > webapp-color-configmap.yaml
+
+# create a secret
+kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123 --dry-run=client -o yaml > db-secret.yaml
+
+--- Service accounts and roles --------------------------------------------
+# create service called demo.
+$ kubectl create sa demo
+
+# create a role named demo that allows user to perform “get”, “watch” and “list” on pods,deploy,ds,rs,sts:
+$ kubectl create role demo --verb=get,list,watch --resource=pods,deploy,ds,rs,sts
+
+# or with all verbs
+$ kubectl create clusterrole demo --verb='*' --resource=pods,deploy,ds,rs,sts
+
+# For cluster role
+$ kubectl create clusterrole demo --verb=get,list,watch --resource=pods,deploy,ds,rs,sts
+
+# create a RoleBinding for the demo role.
+$ kubectl create rolebinding demo --role=demo --user=demo
+
+# for Cluster role
+$ kubectl create rolebinding demo --clusterrole==demo --user=demo
+
+# clusterrole binding
+$ kubectl create clusterrolebinding demo-admin --clusterrole=demo --user=demo
+
+# get created resources
+$ kubectl get sa,role,rolebinding
+NAME                      SECRETS   AGE
+serviceaccount/default    1         2d21h
+serviceaccount/demo       1         4m48s
+serviceaccount/newrelic   1         3h51m
+
+NAME                                  CREATED AT
+role.rbac.authorization.k8s.io/demo   2020-12-10T19:09:01Z
+
+NAME                                         ROLE        AGE
+rolebinding.rbac.authorization.k8s.io/demo   Role/demo   21s
+
+# validate
+kubectl auth can-i create deployment --as demo # yes
+kubectl auth can-i '*' ds --as demo # yes
+
+# clean up
+kubectl delete sa demo
+kubectl delete role demo
+kubectl delete clusterrole demo
+kubectl delete rolebinding demo
+
+--- Contexts -------------------------------------------------------
+# listing contexts
+kubectl config get-contexts
+
+# switch between clusters by setting the current-context in a kubeconfig file
+$ kubectl config use-context <context-name>
+
+# set a context entry in kubeconfig
+kubectl config set-context <context-name>
+
+# if you want to change namespace preference use
+kubectl config set-context <context-name> --namespace=<ns-name>
+
+# see current context
+kubectl config current-context
+
 --- Special -------------------------------------------------------
 # /etc/kubernetes/manifests (if not then check the kubelet config) <-- path where static pods are located <-- create a file there with image, pod name and command
 kubectl run static-busybox --restart=Never --image=busybox --dry-run=client -o yaml --command sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
@@ -195,17 +282,8 @@ kubectl describe pod etcd-controlplane -n kube-system
 # address to reach etcd cluster
 kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-urls
 
---- Ingress --------------------------------------------------------
-# create ingress
-kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
+# validate yamls
+kubectl create --dry-run --validate -f <file>.yaml
 
-# get all ingresses
-kubectl get ingress --all-namespaces
-
---- Configs and secrets --------------------------------------------
-# create a configmap
-kubectl create configmap webapp-color --from-literal=APP_COLOR=darkblue --dry-run=client -o yaml > webapp-color-configmap.yaml
-
-# create a secret
-kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123 --dry-run=client -o yaml > db-secret.yaml
-
+# To list resources sorted by name you’ll use.
+kubectl get <resource> --sort-by=.metadata.name

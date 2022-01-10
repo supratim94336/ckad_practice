@@ -658,7 +658,67 @@ Read about the protections and risks of using secrets here
 
 Having said that, there are other better ways of handling sensitive data like passwords in Kubernetes, such as using tools like Helm Secrets, HashiCorp Vault. I hope to make a lecture on these in the future.
 
+## kubectl replace vs kubectl apply
+`kubectl apply` uses the (declarative approach) provided spec to create a resource if it does not exist and update, i.e., patch, it if it does. The `spec` provided to apply need only contain the required parts of a `spec`, when creating a resource the API will use defaults for the rest and when updating a resource it will use its current values.
+`apply` -> `apply`
+
+The `kubectl replace` (imperative approach) completely replaces the existing resource with the one defined by the provided spec. replace wants a complete spec as input, including read-only properties supplied by the API like `.metadata.resourceVersion`, `.spec.nodeName` for pods, `.spec.clusterIP` for services, and `.secrets` for service accounts. kubectl has some internal tricks to help you get that right, but typically the use case for replace is getting a resource spec, changing a property, and then using that changed, complete spec to replace the existing resource.
+`create` -> `replace`
+
+The `kubectl replace` command has a `--force` option which actually does not use the replace, i.e., `PUT, API endpoint`. It forcibly deletes (`DELETE`) and then recreates, (`POST`) the resource using the provided spec.
+
+## Assign Nodes for pods
+Label Node and Assign Pods to Nodes
+```
+$ kubectl label nodes <node-name> <label-key>=<label-value>
+```
+Example:
+```
+kubectl label nodes k8snode01 disktype=ssd
+```
+You can then assign Pods to the Nodes.
+```
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    disktype: ssd
+```
+
 ## Tips
 - applications = deployments
 - to get node info check pods
 Here's a quick tip. In the exam, you won't know if what you did is correct or not as in the practice tests in this course. You must verify your work yourself. For example, if the question is to create a pod with a specific image, you must run the the kubectl `describe` pod command to verify the pod is created with the correct name and correct image.
+
+```
+$ vim ~/.bashrc
+# kubectl alias
+alias k='kubectl'
+
+# Create resources
+alias kcf='kubectl create -f'
+alias kaf='kubectl apply -f'
+
+# List resources
+alias kgp='kubectl get pods'
+alias kgpa='kubectl get pods --all-namespaces'
+alias kgd='kubectl get deployments'
+alias kgs='kubectl get service'
+alias kgh='kubectl get hpa'
+
+# Delete resources
+alias kd='kubectl delete'
+alias kdp='kubectl delete pods'
+alias kdd='kubectl delete deployments'
+alias kgs='kubectl delete service'
+
+$ source ~/.bashrc
+```
+
+Useful resources:
+1. https://blog.atomist.com/kubernetes-apply-replace-patch/
+2. https://medium.com/payscale-tech/imperative-vs-declarative-a-kubernetes-tutorial-4be66c5d8914
+3. https://komodor.com/learn/the-ultimate-kubectl-cheat-sheet/
+4. https://computingforgeeks.com/kubectl-cheat-sheet-for-kubernetes-cka-exam-prep/
