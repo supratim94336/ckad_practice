@@ -154,7 +154,7 @@ kubectl get all --selector env=prod
 # taint a node
 kubectl taint node node01 spray=mortein:NoSchedule
 
-# un-taint a node (kubectl taint nodes node1 key1=value1:NoSchedule-)
+# un-taint a node (kubectl taint nodes node1 key1=value1:NoSchedule-) taint name can be found from pod description
 kubectl taint nodes controlplane node-role.kubernetes.io/master:NoSchedule-
 
 # label a node
