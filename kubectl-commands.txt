@@ -53,6 +53,12 @@ kubectl exec <pod> -- env
 # pod consuming max resouces
 kubectl top pod --sort-by='cpu'
 
+# explain pods
+kubectl explain pods --recursive | less
+
+# create yaml easily
+kubectl run pod my-busybox --image=busybox --namespace=dev2406 --command sleep 3600 --dry-run=client -o yaml > busybox.yaml
+
 --- Replicaset ----------------------------------------------------
 # scale the replicaset with more replica
 kubectl replace -f replicaset-definition.yml
@@ -149,6 +155,9 @@ kubectl get pods --selector bu=finance
 
 # get all info including replicas
 kubectl get all --selector env=prod
+
+# check service at a url (to check if your ingress rules worked) --> curl -v <<url>>
+curl -v http://watch.ecom-store.com:30093/wear
 
 --- Taints ----------------------------------------------------
 # taint a node
@@ -285,5 +294,5 @@ kubectl describe pod etcd-controlplane -n kube-system | grep -i listen-client-ur
 # validate yamls
 kubectl create --dry-run --validate -f <file>.yaml
 
-# To list resources sorted by name you’ll use.
+# To list resources sorted by name you'll use.
 kubectl get <resource> --sort-by=.metadata.name

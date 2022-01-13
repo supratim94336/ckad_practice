@@ -3,12 +3,13 @@ kind: CronJob
 metadata:
   name: throw-dice-cron-job
 spec:
-  schedule: "30 21 * * *"
+  schedule: "*/1 * * * *"
   jobTemplate:
     spec:
-      completions: 3
-      parallelism: 3
+      completions: 1
+      parallelism: 1
       backoffLimit: 25 # This is so the job does not quit before it succeeds.
+      activeDeadlineSeconds: 20
       template:
         spec:
           containers:
