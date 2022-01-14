@@ -99,6 +99,20 @@ kubectl rollout history deployment nginx
 kubectl rollout history deployment nginx --revision=1
 kubectl set image deployment nginx nginx=nginx:1.17 --record
 
+--- Contexts ------------------------------------------------------
+kubectl config get-contexts                          # display list of contexts 
+kubectl config current-context                       # display the current-context
+kubectl config use-context my-cluster-name           # set the default context to my-cluster-name
+
+# add a new user to your kubeconf that supports basic auth
+kubectl config set-credentials kubeuser/foo.kubernetes.com --username=kubeuser --password=kubepassword
+
+# permanently save the namespace for all subsequent kubectl commands in that context.
+kubectl config set-context --current --namespace=ggckad-s2
+
+# set a context utilizing a specific username and namespace.
+kubectl config set-context gce --user=cluster-admin --namespace=foo && kubectl config use-context gce
+
 --- Namespaces ----------------------------------------------------
 # create namespace
 kubectl create namespace <<namespace_name>>
