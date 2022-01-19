@@ -183,6 +183,22 @@ kubectl create rolebinding dev-user-binding --namespace=default --role=developer
 
 # edit role
 kubectl edit role developer -n blue
+
+# to what users/groups is a cluster role cluster-admin bound to
+kubectl describe clusterrolebinding cluster-admin
+
+# create cluster role
+kubectl create clusterrole node-role --resource=nodes --verb=get,watch,list,create,delete
+
+# create cluster-role-binding
+kubectl create clusterrolebinding node-role-binding --clusterrole=node-role --user=michelle
+
+# check if it worked
+kubectl auth can-i list nodes --as michelle
+
+# get api-resources
+kubectl api-resources | sort -u -k1
+
 --- Services ----------------------------------------------------
 # create a service
 kubectl create -f service-definition.yml
