@@ -9,10 +9,10 @@ metadata:
 
 spec:
   containers:
-    - name: nginx-container
-      image: nginx
+  - name: nginx-container
+    image: nginx
   tolerations:
-    - key: spray
-      value: mortein
-      effect: NoSchedule
-      operator: Equal
+  - key: spray
+    value: mortein
+    effect: NoSchedule
+    operator: Equal

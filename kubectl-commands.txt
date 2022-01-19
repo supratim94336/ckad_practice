@@ -127,6 +127,48 @@ kubectl get namespace --no-headers | wc -l
 # get pods in a namespace
 kubectl get pods --namespace=<<namespace_name>>
 
+--- Configs -----------------------------------------------------
+# default
+kubectl config view
+
+# use another config
+kubectl config view --kubeconfig=my-custom-config
+
+# add new context
+kubectl config use-context prod-user@production
+
+# check where is config
+echo $HOME
+ls -a /root
+ ....
+
+# check current context
+kubectl config current-context
+
+# switch context from a manual new config
+kubectl config --kubeconfig=/root/my-kube-config use-context research
+
+--- Authorizations ----------------------------------------------
+# get roles
+kubectl get roles
+
+# describe role
+kubectl describe role <<role_name>>
+
+# describe binding
+kubectl describe rolebinding <<binding_name>>
+
+# check permissions
+kubectl auth can-i <<create/delete>> <<pods/deployments>> --as dev-user --namespace <<namespace_name>>
+
+# create role
+kubectl create role developer --verb=create,delete,list --resource=pods --namespace=default
+
+# create role binding
+kubectl create rolebinding dev-user-binding --namespace=default --role=developer --user=dev-user
+
+# edit role
+kubectl edit role developer -n blue
 --- Services ----------------------------------------------------
 # create a service
 kubectl create -f service-definition.yml
@@ -189,6 +231,9 @@ kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-
 
 # get all ingresses
 kubectl get ingress --all-namespaces
+
+# explain ingress info recursively
+kubectl explain ingress --recursive | grep VERSION
 
 --- Configs and secrets --------------------------------------------
 # create a configmap
@@ -296,3 +341,23 @@ kubectl create --dry-run --validate -f <file>.yaml
 
 # To list resources sorted by name you'll use.
 kubectl get <resource> --sort-by=.metadata.name
+
+# get taints on nodes
+kubectl get nodes -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints}{"\n"}{end}'
+
+# server settings
+# get api server settings
+kubectl describe pod kube-apiserver-controlplane -n kube-system
+
+--- Docker ---------------------------------------------------------
+# build an image
+docker build -t webapp-color .
+
+# build a container and expose to a port
+docker run -p 8282:8080 webapp-color
+
+# check base image
+docker run python:3.6 cat /etc/*release*
+
+# tag an image
+docker tag httpd fedora/httpd:version1.0
