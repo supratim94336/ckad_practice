@@ -866,10 +866,65 @@ kubectl-convert -f ingress-old.yaml --output-version networking.k8s.io/v1 > ingr
 #### check if it was successful
 ```
 kubectl apply -f ingress-new.yaml &
-kubectl get ing ingress-space -o yaml | grep apiVersio
+kubectl get ing ingress-space -o yaml | grep apiVersion
 ```
 
-#### move to binaries
+### rolling update vs recreate
+#### recreate
+```
+strategy:
+    type: Recreate
+```
+
+#### rollingUpdate
+```
+strategy:
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
+  type: RollingUpdate
+```
+
+### CronJob vs Job
+#### Job is
+```
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: throw-dice-pod
+spec:
+  backoffLimit: 15
+  completions: 3
+  parallelism: 3
+  template:
+    spec:
+      containers:
+        - name: throw-dice
+          image: kodekloud/throw-dice
+      restartPolicy: Never
+```
+
+#### CronJob is job inside Cron schedule
+```
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: throw-dice-cron-job
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      backoffLimit: 25 # This is so the job does not quit before it succeeds.
+      activeDeadlineSeconds: 20
+      template:
+        spec:
+          containers:
+          - name: throw-dice
+            image: kodekloud/throw-dice
+          restartPolicy: Never
+```
 
 ## Useful resources:
 1. https://blog.atomist.com/kubernetes-apply-replace-patch/

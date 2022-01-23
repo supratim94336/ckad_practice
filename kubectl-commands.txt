@@ -62,6 +62,9 @@ kubectl run pod my-busybox --image=busybox --namespace=dev2406 --command sleep 3
 # get pod's security context
 kubectl get pod pod-with-defaults -o yaml | grep -A2 securityContext
 
+# forcefully recreate pods
+kubectl apply -f new-defn.yaml --force
+
 --- Replicaset ----------------------------------------------------
 # scale the replicaset with more replica
 kubectl replace -f replicaset-definition.yml
@@ -115,6 +118,12 @@ kubectl config set-context --current --namespace=ggckad-s2
 
 # set a context utilizing a specific username and namespace.
 kubectl config set-context gce --user=cluster-admin --namespace=foo && kubectl config use-context gce
+
+--- Jobs ----------------------------------------------------------
+# get job logs
+kubectl describe job.batch/throw-dice-job
+
+# to increase chances of completions increase the backoffLimit
 
 --- Namespaces ----------------------------------------------------
 # create namespace
