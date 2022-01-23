@@ -766,7 +766,112 @@ tolerations:
   effect: "NoSchedule"
 ```
 
-Useful resources:
+## Admission Controllers
+An admission controller is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized. The controllers consist of the list below, are compiled into the kube-apiserver binary, and may only be configured by the cluster administrator. In that list, there are two special controllers: MutatingAdmissionWebhook and ValidatingAdmissionWebhook. These execute the mutating and validating (respectively) admission control webhooks which are configured in the API.
+
+Admission controllers may be "validating", "mutating", or both. Mutating controllers may modify related objects to the requests they admit; validating controllers may not.
+Admission controllers limit requests to create, delete, modify objects or connect to proxy. They do not limit requests to read objects.
+
+### Which plugins are enabled by default?
+To see which admission plugins are enabled:
+```
+kube-apiserver -h | grep enable-admission-plugins
+```
+
+In the current version, the default ones are:
+```
+CertificateApproval, CertificateSigning, CertificateSubjectRestriction, DefaultIngressClass, DefaultStorageClass, DefaultTolerationSeconds, LimitRanger, MutatingAdmissionWebhook, NamespaceLifecycle, PersistentVolumeClaimResize, Priority, ResourceQuota, RuntimeClass, ServiceAccount, StorageObjectInUseProtection, TaintNodesByCondition, ValidatingAdmissionWebhook
+```
+
+### Important Errors
+```
+Error from server: error when creating "/root/pod-with-conflict.yaml": admission webhook "webhook-server.webhook-demo.svc" denied the request: runAsNonRoot specified, but runAsUser set to 0 (the root user)
+```
+
+### Why pv and pvc isn't enough
+The StorageClass used by the PVC uses `WaitForFirstConsumer` volume binding mode. This means that the persistent volume will not bind to the claim until a pod makes use of the PVC to request storage.
+
+Create a pod that has the volume mount described and the name of the pvc is important here
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx:alpine
+    name: nginx
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/www/html
+      name: local-storage
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: local-storage
+    persistentVolumeClaim:
+      claimName: local-pvc
+status: {}
+```
+### Change runtime config for a resource
+#### take backup
+```
+cp -v /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.backup
+```
+#### change file
+```
+vim /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+```
+- command:
+    - kube-apiserver
+    - --advertise-address=10.18.17.8
+    - --allow-privileged=true
+    - --authorization-mode=Node,RBAC
+    - --client-ca-file=/etc/kubernetes/pki/ca.crt
+    - --enable-admission-plugins=NodeRestriction
+    - --enable-bootstrap-token-auth=true
+    - --runtime-config=rbac.authorization.k8s.io/v1alpha1 --> This one 
+```
+#### save the file and run this one to check if it was successful
+```
+kubectl get po -n kube-system
+```
+### Install a plugin (kubectl convert)
+#### download the package
+```
+curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl-convert
+```
+
+#### change permissions to move it to the binaries
+```
+chmod +x kubectl-convert
+mv kubectl-convert /usr/locl/bin/kubectl-convert
+```
+
+#### check if successful
+```
+kubectl --version
+```
+
+#### use it to change output version of an ingress file
+```
+kubectl-convert -f ingress-old.yaml --output-version networking.k8s.io/v1 > ingress-new.yaml
+```
+
+#### check if it was successful
+```
+kubectl apply -f ingress-new.yaml &
+kubectl get ing ingress-space -o yaml | grep apiVersio
+```
+
+#### move to binaries
+
+## Useful resources:
 1. https://blog.atomist.com/kubernetes-apply-replace-patch/
 2. https://medium.com/payscale-tech/imperative-vs-declarative-a-kubernetes-tutorial-4be66c5d8914
 3. https://komodor.com/learn/the-ultimate-kubectl-cheat-sheet/

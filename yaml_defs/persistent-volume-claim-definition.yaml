@@ -1,10 +1,11 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: claim-log-1
+  name: local-pvc
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: local-storage
   resources:
     requests:
-      storage: 50Mi
+      storage: 500Mi

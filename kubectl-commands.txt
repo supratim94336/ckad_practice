@@ -59,6 +59,9 @@ kubectl explain pods --recursive | less
 # create yaml easily
 kubectl run pod my-busybox --image=busybox --namespace=dev2406 --command sleep 3600 --dry-run=client -o yaml > busybox.yaml
 
+# get pod's security context
+kubectl get pod pod-with-defaults -o yaml | grep -A2 securityContext
+
 --- Replicaset ----------------------------------------------------
 # scale the replicaset with more replica
 kubectl replace -f replicaset-definition.yml
@@ -221,6 +224,9 @@ kubectl run redis --image=redis:alpine --dry-run=client -o yaml > redis-pod.yaml
 # create a file on the fly 2: check file creation first look (whenever you're creating a pod and exposing it, it automatically creates a service, cause you can expose a service not a pod)
 kubectl run httpd --image=httpd:alpine --port 80 --expose --dry-run=client -o yaml
 
+# expose a deployment
+kubectl expose deployment ingress-controller -n ingress-space --type=NodePort --port=80 --name=ingress --dry-run=client -o yaml > ingress.yaml
+
 # get pods by by selector
 kubectl get pods --selector env=dev
 kubectl get pods --selector bu=finance
@@ -230,6 +236,12 @@ kubectl get all --selector env=prod
 
 # check service at a url (to check if your ingress rules worked) --> curl -v <<url>>
 curl -v http://watch.ecom-store.com:30093/wear
+
+# check exposed port
+kubectl get pod mongo-75f59d57f4-4nd6q --template='{{(index (index .spec.containers 0).ports 0).containerPort}}{{"\n"}}'
+
+# port forward
+kubectl port-forward service/mongo 28015:27017
 
 --- Taints ----------------------------------------------------
 # taint a node
@@ -271,6 +283,9 @@ kubectl create configmap webapp-color --from-literal=APP_COLOR=darkblue --dry-ru
 
 # create a secret
 kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123 --dry-run=client -o yaml > db-secret.yaml
+
+# create tls secret
+kubectl create secret tls webhook-server-tls --cert=/root/keys/webhook-server-tls.crt --key=/root/keys/webhook-server-tls.key --namespace=webhook-demo
 
 --- Service accounts and roles --------------------------------------------
 # create service called demo.
@@ -333,6 +348,12 @@ kubectl config set-context <context-name> --namespace=<ns-name>
 # see current context
 kubectl config current-context
 
+--- Storage Classes -----------------------------------------------
+# describe a storage class
+kubectl describe storageclass local-storage
+
+# if it says noprovision that means it has no dynamic provisioning
+
 --- Special -------------------------------------------------------
 # /etc/kubernetes/manifests (if not then check the kubelet config) <-- path where static pods are located <-- create a file there with image, pod name and command
 kubectl run static-busybox --restart=Never --image=busybox --dry-run=client -o yaml --command sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
@@ -379,6 +400,19 @@ kubectl get nodes -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.tai
 # get api server settings
 kubectl describe pod kube-apiserver-controlplane -n kube-system
 
+# os installed
+cat /etc/*release*
+
+# kubectl api-resources for shortforms/abbreviations
+kubectl api-resources
+
+# get api version
+kubectl proxy 8001&
+curl localhost:8001/apis/authorization.k8s.io
+
+# alias
+alias ktl='kubectl' 
+
 --- Docker ---------------------------------------------------------
 # build an image
 docker build -t webapp-color .
@@ -391,3 +425,39 @@ docker run python:3.6 cat /etc/*release*
 
 # tag an image
 docker tag httpd fedora/httpd:version1.0
+
+--- Kube-System-Namespace -------------------------------------------
+# get all pods
+kubectl get pods -n=kube-system
+
+# get inside kube-apiserver
+kubectl exec -ti kube-apiserver-controlplane -n=kube-system -- kube-apiserver -h
+
+# check config files
+grep enable-admission-plugins /etc/kubernetes/manifests/kube-apiserver.yaml
+    - --enable-admission-plugins=NodeRestriction
+
+# check admission plugins (every pod is still a linux process)
+ps -ef | grep kube-apiserver | grep admission-plugins
+
+# modify admission control
+vim /etc/kubernetes/manifests/kube-apiserver.yaml
+
+--- Helm ------------------------------------------------------------
+# search helm charts for wordpress
+helm search hub wordpress
+
+# repo add
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+# search an already added repo
+helm search repo joomla
+
+# install a release from a repo/application
+helm install bravo bitnami/drupal
+
+# pull a repo in /root
+helm pull --untar bitnami/apache
+
+# after you pulled all the config is inside ./apache/values.yaml and feel free to change and save and install it by the name my-webapp
+helm install my-webapp ./apache
