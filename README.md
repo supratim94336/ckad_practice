@@ -500,6 +500,9 @@ roleRef:
   name: pod-reader # this must match the name of the Role or ClusterRole you wish to bind to
   apiGroup: rbac.authorization.k8s.io
 ```
+
+Once you create a role, you have to create a rolebinding with a user in mind so that the user can use that role to do stuff
+
 ### Once created, you may authenticate into the kube-api server using the users credentials
 ```
 curl -v -k https://localhost:6443/api/v1/pods -u "user1:password123"
@@ -657,6 +660,11 @@ Once the Pod that depends on the secret is deleted, kubelet will delete its loca
 Read about the protections and risks of using secrets here
 
 Having said that, there are other better ways of handling sensitive data like passwords in Kubernetes, such as using tools like Helm Secrets, HashiCorp Vault. I hope to make a lecture on these in the future.
+
+#### to convert a secret to base64
+```
+echo -n 'string' | base64
+```
 
 ## kubectl replace vs kubectl apply
 `kubectl apply` uses the (declarative approach) provided spec to create a resource if it does not exist and update, i.e., patch, it if it does. The `spec` provided to apply need only contain the required parts of a `spec`, when creating a resource the API will use defaults for the rest and when updating a resource it will use its current values.
@@ -924,6 +932,25 @@ spec:
           - name: throw-dice
             image: kodekloud/throw-dice
           restartPolicy: Never
+```
+
+### Different kind of secrets
+#### generic secret
+like `env` variables
+```
+envFrom:
+  - secretRef:
+      name: db-secret
+```
+
+#### volume mount secret
+like a volume
+```
+volumes:
+  - name: default-token-mz49x
+    secret:
+      defaultMode: 420
+      secretName: default-token-mz49x
 ```
 
 ## Useful resources:

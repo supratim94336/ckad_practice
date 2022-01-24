@@ -35,6 +35,18 @@ kubectl get pod app -n elastic-stack -o yaml > app.yaml
 # who is running the pod
 kubectl exec ubuntu-sleeper -- whoami
 
+# to convert a secret to base64
+echo -n 'string' | base64
+
+# check secrets inside the container
+ls /opt/app-secret-volumes
+
+# or
+kubectl exec -ti webapp-pod -- cat /opt/webapp-mysql/kube-files/secret-data.yaml
+
+# extract secret
+cat /opt/app-secret-volumes/{{secret_name}}
+
 # find pods by label
 kubectl get pods -l name=payroll
 
@@ -186,6 +198,9 @@ kubectl describe rolebinding <<binding_name>>
 
 # check permissions
 kubectl auth can-i <<create/delete>> <<pods/deployments>> --as dev-user --namespace <<namespace_name>>
+
+# check permission simple
+kubectl get pod --as dev-user
 
 # create role
 kubectl create role developer --verb=create,delete,list --resource=pods --namespace=default
