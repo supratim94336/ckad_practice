@@ -277,6 +277,9 @@ kubectl taint nodes controlplane node-role.kubernetes.io/master:NoSchedule-
 # label a node
 kubectl label node node01 color=blue
 
+# label all pods in a namespace
+kubectl label pods --all protected=true -n sun
+
 # create deployment with specification
 kubectl create deployment blue --image=nginx --replicas=3
 
