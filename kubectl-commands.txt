@@ -483,8 +483,33 @@ helm search repo joomla
 # install a release from a repo/application
 helm install bravo bitnami/drupal
 
-# pull a repo in /root
+# download/pull a repo in /root
 helm pull --untar bitnami/apache
 
 # after you pulled all the config is inside ./apache/values.yaml and feel free to change and save and install it by the name my-webapp
 helm install my-webapp ./apache
+
+# list repo
+helm repo list
+
+# list packages
+helm list
+
+# uninstall package
+helm uninstall bravo
+
+--- vim -------------------------------------------------------------
+# got to line
+ESC + line_num + (Shift + G)
+
+
+--- grep ------------------------------------------------------------
+# line number
+grep -n <<string>>
+
+# ignore case
+grep -iF <<string>>
+
+--- sort result by column -------------------------------------------
+kubectl get deploy | sort -u -k1
+
