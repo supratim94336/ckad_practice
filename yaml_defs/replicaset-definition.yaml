@@ -6,12 +6,12 @@ spec:
   template:
     metadata:
       labels:
-        tier: frontend
+        tier: frontend  # <--- must match
     spec:
       containers:
       - name: nginx
         image: nginx
   selector:
     matchLabels:
-      tier: frontend
+      tier: frontend  # <--- must match
   replicas: 3

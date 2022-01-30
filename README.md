@@ -877,6 +877,9 @@ kubectl apply -f ingress-new.yaml &
 kubectl get ing ingress-space -o yaml | grep apiVersion
 ```
 
+#### note:
+ingress controller is a deployment but ingress is the set of rules, ingress-controller uses ingress to apply the rules
+
 ### rolling update vs recreate
 #### recreate
 ```
