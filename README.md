@@ -585,7 +585,7 @@ master $ kubectl rollout history deployment nginx
 REVISION CHANGE-CAUSE
 1     <none>
 2     kubectl set image deployment nginx nginx=nginx:1.17 --record=true
-3     kubectl edit deployments. nginx --record=true
+3     kubectl edit deployment nginx --record=true
 
 
 
@@ -616,7 +616,7 @@ deployment.extensions/nginx rolled back
 master $ kubectl rollout history deployment nginx
 deployment.extensions/nginxREVISION CHANGE-CAUSE
 1     <none>
-3     kubectl edit deployments. nginx --record=true
+3     kubectl edit deployment nginx --record=true
 4     kubectl set image deployment nginx nginx=nginx:1.17 --record=true
 
 
@@ -954,6 +954,11 @@ volumes:
     secret:
       defaultMode: 420
       secretName: default-token-mz49x
+```
+
+### Network Policy
+It is created against one pod and then other pods are selected on basis of that
+```
 ```
 
 ## Useful resources:

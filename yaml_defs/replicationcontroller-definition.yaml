@@ -6,6 +6,7 @@ metadata:
     app: myapp
     type: front-end
 spec:
+  replicas: 3
   template:
     metadata:
       name: myapp-pod
@@ -16,4 +17,3 @@ spec:
       containers:
         - name: nginx-container
           image: nginx
-replicas: 3

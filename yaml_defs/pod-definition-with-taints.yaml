@@ -6,7 +6,6 @@ metadata:
   name: bee
   labels:
     app: bee
-
 spec:
   containers:
   - name: nginx-container

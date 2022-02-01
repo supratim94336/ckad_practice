@@ -12,14 +12,17 @@ spec:
     name: time-check
     command: ["/bin/sh"]
     args: ["-c", "while true; do echo hello; sleep 10;done"]
-    envFrom:
-    - configMapRef:
+    env:
+    - name: TIME_FREQ
+      valueFrom:
+      - configMapRef:
         name: time-config
+        key: TIME_FREQ
     volumeMounts:
     - mountPath: /opt/time
-      name: a-volume
+      name: log-volume
   volumes:
-  - name: a-volume
+  - name: log-volume
     emptyDir: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always

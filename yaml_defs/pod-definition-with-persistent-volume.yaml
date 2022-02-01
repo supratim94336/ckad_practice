@@ -1,3 +1,4 @@
+apiVersion: v1
 kind: Pod
 metadata:
   name: webapp
@@ -14,8 +15,10 @@ spec:
       name: log-volume
   volumes:
   - name: log-volume
+    # this 19-21
     hostPath:
       path: /var/log/webapp
       type: Directory
+    # or 23-24
     # persistentVolumeClaim:
     #   claimName: claim-log-1

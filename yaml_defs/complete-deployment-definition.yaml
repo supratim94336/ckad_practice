@@ -7,7 +7,6 @@ metadata:
   name: redis
 spec:
   replicas: 1
-  nodeName: master
   selector:
    matchLabels:
      app: redis
@@ -15,24 +14,23 @@ spec:
     metadata:
       labels:
         app: redis
-    containers:
-    - image: redis:alpine
-      name: deployment
-      resources:
-        requests:
-          cpu: ".2"
-      volumeMounts:
-      - mountPath: /redis-master-data
-        name: data
-      - mountPath: /redis-data
-        name: redis-config
-      ports:
-      - containerPort: 6379
-    dnsPolicy: ClusterFirst
-    restartPolicy: Always
-    volumes:
-    - name: data
-      emptyDir: {}
-    - name: redis-config
-      configMap:
-        name: redis-config
+    spec:
+      containers:
+      - image: redis:alpine
+        name: deployment
+        resources:
+          requests:
+            cpu: ".2"
+        volumeMounts:
+        - mountPath: /redis-master-data
+          name: data
+        - mountPath: /redis-master
+          name: redis-config
+        ports:
+        - containerPort: 6379
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: redis-config
+        configMap:
+          name: redis-config

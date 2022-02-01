@@ -1,11 +1,8 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  creationTimestamp: "2022-01-06T06:58:08Z"
   name: ubuntu-sleeper
   namespace: default
-  resourceVersion: "745"
-  uid: 6e35d9cc-7434-4d88-905f-bb41a31916ca
 spec:
   containers:
   - command:
@@ -63,40 +60,3 @@ spec:
               apiVersion: v1
               fieldPath: metadata.namespace
             path: namespace
-status:
-  conditions:
-  - lastProbeTime: null
-    lastTransitionTime: "2022-01-06T06:58:08Z"
-    status: "True"
-    type: Initialized
-  - lastProbeTime: null
-    lastTransitionTime: "2022-01-06T06:58:14Z"
-    status: "True"
-    type: Ready
-  - lastProbeTime: null
-    lastTransitionTime: "2022-01-06T06:58:14Z"
-    status: "True"
-    type: ContainersReady
-  - lastProbeTime: null
-    lastTransitionTime: "2022-01-06T06:58:08Z"
-    status: "True"
-    type: PodScheduled
-  containerStatuses:
-  - containerID: containerd://ba2352b2b5608e2a6e30249f8add654107f346d06802f47353ff11ae7a7f890c
-    image: docker.io/library/ubuntu:latest
-    imageID: docker.io/library/ubuntu@sha256:626ffe58f6e7566e00254b638eb7e0f3b11d4da9675088f4781a50ae288f3322
-    lastState: {}
-    name: ubuntu
-    ready: true
-    restartCount: 0
-    started: true
-    state:
-      running:
-        startedAt: "2022-01-06T06:58:13Z" 
-  hostIP: 172.25.0.73
-  phase: Running
-  podIP: 10.42.0.9
-  podIPs:
-  - ip: 10.42.0.9
-  qosClass: BestEffort
-  startTime: "2022-01-06T06:58:08Z"
