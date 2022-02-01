@@ -1,4 +1,4 @@
-| Short | Full name | 
+| acronym | command | 
 | --- | --- |
 | csr | certificatesigningrequests | 
 | cs | componentstatuses | 
